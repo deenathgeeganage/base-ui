@@ -1,20 +1,39 @@
-import { Form, Input, Checkbox, Button } from "antd";
+import { Form, Input, Checkbox, Button, message } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import styles from "./styles.module.css";
-import axios from "axios";
+import axios from "../../components/Axios";
 import { withConfigContext } from "../../components/context/ConfigContext";
+import useAuth from "../../components/hooks/useAuth";
+import { useForm } from "antd/es/form/Form";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const auth = useAuth();
+  const form = useForm();
+  const navigate = useNavigate();
+  const [credentialError, setCredentialError] = useState(false);
   const onFinish = (values) => {
     axios
-      .post("http://localhost:9443/api/v2/login", values)
+      .post("http://localhost:8080/api/v1/auth/authenticate", values)
       .then((res) => {
-        console.info(res.data, res.status);
+        // console.info(res.data, res.status);
+        auth.setAuth(res.data);
+        let redirectUrl = "/";
+        const searchParams = new URLSearchParams(
+          window.location.search.replace(window.location.origin, "")
+        );
+        if (searchParams.has("redirect")) {
+          redirectUrl = searchParams.get("redirect");
+        }
+        navigate(redirectUrl);
       })
       .catch((err) => {
-        console.log(err);
+        message.error("Invalid Credentials !");
+        console.log(form);
+        setCredentialError(true);
       });
-    console.log("Success:", values);
+    // console.log("Success:", values);
   };
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
@@ -32,11 +51,12 @@ const Login = () => {
         >
           <Form.Item
             name="username"
+            validateStatus={credentialError ? "error" : ""}
             rules={[
-              {
-                type: "email",
-                message: "The input is not valid E-mail!",
-              },
+              // {
+              //   type: "email",
+              //   message: "The input is not valid E-mail!",
+              // },
               { required: true, message: "Please input your Username!" },
             ]}
           >
@@ -47,6 +67,7 @@ const Login = () => {
           </Form.Item>
           <Form.Item
             name="password"
+            validateStatus={credentialError ? "error" : ""}
             rules={[{ required: true, message: "Please input your Password!" }]}
           >
             <Input
