@@ -1,0 +1,14 @@
+.container_Card {
+  width: 60vw;
+  padding: 20px 100px;
+  padding-top: 0px;
+}
+
+.table {
+  text-transform: capitalize;
+}
+
+.addButton {
+  right: 21.5vw;
+  bottom: 23.5vh;
+}
